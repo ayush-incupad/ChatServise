@@ -36,36 +36,57 @@ document.addEventListener("DOMContentLoaded", function () {
             followupQuestions: []
         }
     ];
-    const apiUrl = 'https://dev-portal.enterprise.tau.simplyfy.ai/api/v1/master/organisation/chat-service/chat/?is_testing=True';
-    const firstRequestBody = {
-        "service_id": `${serviceId}`,
-        "data": [
-            {
-                "role": "user",
-                "content": `${ChatBotServise}`
-            }
-        ]
-    };
 
-    fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(firstRequestBody)
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (typeof data.data.content === 'string') {
-                chatBot[0].introMsg = data.data.content;
-            } else if (Array.isArray(data.data.content) || typeof data.data.content === 'object') {
-                chatBot[0].introMsg = data.data.content.answer;
-            }
-            chatBot[0].followupQuestions = data.example_prompts
+    (function runApiAutomatically() {
+        const apiUrl = 'https://dev-portal.enterprise.tau.simplyfy.ai/api/v1/master/organisation/chat-service/chat/?is_testing=True';
+        const firstRequestBody = {
+            "service_id": `${serviceId}`,
+            // "conversation_id": null,
+            // "messageData": []
+            // "data": [
+            //     {
+            //         "role": "user",
+            //         "content": ['']
+            //     }
+            // ]
+            "messages": [
+                {
+                    "role": "user",
+                    "content": '' 
+                }
+            ]
+        };
+        console.log("Request Body:", JSON.stringify(firstRequestBody));
+
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(firstRequestBody)
         })
-    console.log(chatBot[0],"AYush")
+            .then(response => response.json())
+            .then(data => {
+                if (typeof data.data.content === 'string') {
+                    chatBot[0].introMsg = data.data.content;
+                } else if (Array.isArray(data.data.content) || typeof data.data.content === 'object') {
+                    chatBot[0].introMsg = data.data.content.answer;
+                }
 
-    fetch(`https://dev-portal.enterprise.tau.simplyfy.ai/api/v1/master/services/${serviceId}/detail/?is_testing=True`)
+                chatBot[0].followupQuestions = data.example_prompts || [];
+
+                console.log(chatBot[0].introMsg, "Intro Message Updated");
+                console.log(chatBot[0].followupQuestions, "Follow-up Questions Updated");
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
+        console.log(chatBot, "AYush");
+    })();
+
+
+    fetch(`https://dev-portal.enterprise.tau.simplyfy.ai/api/v1/master/organisation/chat-service/${serviceId}/?is_testing=True`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -79,6 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 chatBot[0].title = data.data.title;
             }
             ChatBotServise = data.data
+            console.log(data, "AYush")
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
@@ -363,7 +385,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const followupQuestionsRow = document.createElement('div');
         followupQuestionsRow.style.cssText = 'display: flex; flex-direction: row;gap:2px';
-        
+
         console.log(chatBot[0].followupQuestions)
         chatBot[0].followupQuestions.forEach((followQueItem, index) => {
 
@@ -560,11 +582,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         console.log(LeadSubmitDiloge)
                         chatBot[0].followupQuestions = data.example_prompts;
                         chatBot[0].followupQuestions.forEach((followQueItem, index) => {
-                
+
                             if (index < 4) {
                                 const followupQuestionItem = document.createElement('div');
                                 followupQuestionItem.style.cssText = 'min-width: 28%; ';
-                
+
                                 const button = document.createElement('button');
                                 button.style.cssText = 'position: relative; white-space: nowrap; border-radius: 0.375rem; padding-top: 0.75rem; padding-right: 1rem; padding-bottom: 0.75rem; padding-left: 1rem;min-width:100px;border:0px;';
                                 button.addEventListener('click', () => {
@@ -575,33 +597,33 @@ document.addEventListener("DOMContentLoaded", function () {
                                 });
                                 const flexContainer = document.createElement('div');
                                 flexContainer.style.cssText = 'display: flex; width: 100%;  align-items: center; justify-content: center;';
-                
+
                                 const flexInnerContainer = document.createElement('div');
                                 flexInnerContainer.style.cssText = 'display: flex; width: 100%; align-items: center; justify-content: space-between;';
-                
+
                                 const textContainer = document.createElement('div');
                                 textContainer.style.cssText = 'display: flex; flex-direction: column; overflow: hidden;';
-                
+
                                 const truncatedPart1 = document.createElement('div');
                                 truncatedPart1.style.cssText = 'overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
-                
+
                                 // truncatedPart1.textContent = followQueItem.part1;
                                 truncatedPart1.textContent = followQueItem;
                                 const truncatedPart2 = document.createElement('div');
                                 truncatedPart2.style.cssText = 'overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: normal; opacity: 0.5;';
                                 // const truncatedText = followQueItem.part2.substring(0, 18);
                                 const truncatedText = followQueItem.substring(0, 18);
-                
+
                                 // const truncatedContent = followQueItem.part2.length > 18 ? truncatedText + '...' : truncatedText;
                                 const truncatedContent = followQueItem.length > 18 ? truncatedText + '...' : truncatedText;
-                
+
                                 truncatedPart2.textContent = truncatedContent;
-                
+
                                 textContainer.appendChild(truncatedPart1);
                                 textContainer.appendChild(truncatedPart2);
-                
+
                                 flexInnerContainer.appendChild(textContainer);
-                
+
                                 flexContainer.appendChild(flexInnerContainer);
                                 button.appendChild(flexContainer);
                                 followupQuestionItem.appendChild(button);
