@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "messages": [
                 {
                     "role": "user",
-                    "content": '' 
+                    "content": ''
                 }
             ]
         };
@@ -72,11 +72,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (Array.isArray(data.data.content) || typeof data.data.content === 'object') {
                     chatBot[0].introMsg = data.data.content.answer;
                 }
-
                 chatBot[0].followupQuestions = data.example_prompts || [];
 
-                console.log(chatBot[0].introMsg, "Intro Message Updated");
-                console.log(chatBot[0].followupQuestions, "Follow-up Questions Updated");
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
@@ -86,6 +83,14 @@ document.addEventListener("DOMContentLoaded", function () {
     })();
 
 
+    const openDialogButton = document.createElement('button');
+    openDialogButton.id = 'openDialogButton';
+    openDialogButton.style.cssText = 'position: fixed;color: white; border: none; border-radius: 50%; padding: 10px 14px; cursor: pointer;';
+
+    const openDialogButtonImage = document.createElement('img');
+    openDialogButtonImage.alt = 'Chat Icon';
+    openDialogButtonImage.style.cssText = 'width: 40px; height: 40px;border-radius: 10%;';
+
     fetch(`https://dev-portal.enterprise.tau.simplyfy.ai/api/v1/master/organisation/chat-service/${serviceId}/?is_testing=True`)
         .then(response => {
             if (!response.ok) {
@@ -94,28 +99,16 @@ document.addEventListener("DOMContentLoaded", function () {
             return response.json();
         })
         .then(data => {
-            // Update the chatBot array with the new image and title from the fetched data
             if (data && data.data) {
                 chatBot[0].image = data.data.image;
                 chatBot[0].title = data.data.title;
             }
             ChatBotServise = data.data
-            console.log(data, "AYush")
+            openDialogButtonImage.src = chatBot[0].image;
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
-
-
-
-    const openDialogButton = document.createElement('button');
-    openDialogButton.id = 'openDialogButton';
-    openDialogButton.style.cssText = 'position: fixed;color: white; border: none; border-radius: 50%; padding: 10px 14px; cursor: pointer;';
-
-    const openDialogButtonImage = document.createElement('img');
-    openDialogButtonImage.src = chatBot[0].image;
-    openDialogButtonImage.alt = 'Chat Icon';
-    openDialogButtonImage.style.cssText = 'width: 35px; height: 35px;';
 
     openDialogButton.appendChild(openDialogButtonImage);
 
